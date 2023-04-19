@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import imageio
 import random
+import time
 
 class Klotski_board :
     #class attributes :
@@ -177,15 +178,23 @@ class Klotski_board :
         self.initial_board = self.board.copy()
 
     #write a line with the initial board and a bool for solvability
-    def save(self, path) :
+    def save(self, path, timesTrue, timesFalse) :
         file = open(path, "a")
+        tstart = time.time()
         bool, i = self.solve_largeur()
-        for board in self.visited :
-            for i in range(0, self.width):
-                for j in range(0, self.height) :
-                    file.write(str(board[i, j]))
-                    file.write(" ")
-            file.write(str(bool))
+        t = time.time() - tstart
+        if bool :
+            timesTrue[0].append(t)
+            timesTrue[1].append(self.iteration)
+        if not bool :
+            timesFalse[0].append(t)
+            timesFalse[1].append(self.iteration)
+        if not bool :
+            for board in self.visited :
+                for i in range(0, self.width):
+                    for j in range(0, self.height) :
+                        file.write(str(board[i, j]))
+                        file.write(" ")
             file.write("\n")
 
     #return the pieces types to accelerate comparison when exploring possible combinations
@@ -418,11 +427,13 @@ k.generate_random()
 plt.imshow(k.colorized(k.board))
 plt.show()
 k.save("data_base.txt")
+timesFalse = [[], []]
+timesTrue = [[], []]
 
 for iter in range(0, 50) :
     k.__init__()
     k.generate_random()
-    k.save("data_base_cluster.txt")
+    k.save("data_base_cluster.txt", timesTrue, timesFalse)
     print("\n")
     print("iteration ", iter)
     print("\n")
